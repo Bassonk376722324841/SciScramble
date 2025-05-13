@@ -1,0 +1,217 @@
+from tkinter import *
+
+# Prevents unwanted windows
+from functools import partial
+
+class StartQuiz:
+    '''
+    Initial interface for quiz that asks users
+    to choose the amount of playable rounds.
+    '''
+
+    def __init__(self):
+        '''
+        Gets number of rounds
+        '''
+
+        self.start_frame = Frame(padx=10, pady=10)
+        self.start_frame.grid()
+
+        # Strings for labels
+        intro_string = ("In each round you will be challenged to enter what word "
+                        "you believe is being shown in an  anagram and learn new "
+                        "scientific terms with each success!")
+
+        difficulty_string = "Choose difficulty"
+
+        # List of labels to be made (text | font | fg)
+        start_labels_list = [
+            ["SciScramble", ("Arial", "16", "bold"), None],
+            [intro_string, ("Arial", "12"), None],
+            [difficulty_string, ("Arial", "11", "bold"), "black"]
+        ]
+
+        # Create labels and add them to the reference list
+        start_label_ref = []
+
+        for count, item in enumerate(start_labels_list):
+            make_label = Label(self.start_frame, text=item[0], font=item[1],
+                               fg=item[2], wraplength=350, justify="left", padx=20, pady=10)
+            make_label.grid(row=count)
+
+            start_label_ref.append(make_label)
+
+        # Create button for players that are not
+        # aware of what anagrams arw
+        self.anag_info_button = Button(self.start_frame, font=("Arial", "9", "bold"),
+                                       fg="purple", text="What are anagrams?", width=17,
+                                       command=self.open_info)
+        self.anag_info_button.grid(row=3, column=0)
+
+        # Extract choice label so that it can be
+        # replaced with an error message if necessary
+        self.choose_label = start_label_ref[2]
+
+        # Frame so that an entry box and button can be in the same row
+        self.entry_area_frame = Frame(self.start_frame)
+        self.entry_area_frame.grid(row=4)
+
+        self.num_rounds_entry = Entry(self.entry_area_frame, font=("Arial", "20", "bold"),
+                                      width=10)
+        self.num_rounds_entry.grid(row=0, column=0, padx=10, pady=10)
+
+        # Add a placeholder in the entry box...
+
+        # First add key bindings
+        self.num_rounds_entry.bind("<FocusIn>", self.clear_placeholder)
+        self.num_rounds_entry.bind("<FocusOut>", self.add_placeholder)
+
+        # Placeholder for entry box
+        self.pholder = "Number of rounds"
+
+        # Add placeholder
+        self.add_placeholder
+
+
+        # Create play button...
+
+        # Create play button
+        self.play_button = Button(self.entry_area_frame, font=("Arial", "16", "bold"),
+                                  fg="#FFFFFF", bg="#0057D8", text="Play", width=10,
+                                  command=self.check_rounds)
+        self.play_button.grid(row=0, column=1)
+
+    def add_placeholder(self, event=None):
+        if not self.num_rounds_entry.get():
+            self.num_rounds_entry.insert(0, self.pholder)
+            self.num_rounds_entry.config(fg = "grey")
+
+    def clear_placeholder(self, event=None):
+        if self.num_rounds_entry.cget("fg") == "grey" and self.num_rounds_entry.get() == self.pholder:
+            self.num_rounds_entry.delete(0, END)
+            self.num_rounds_entry.fg = "black"
+
+    def get_actual_value(self):
+        """Get the actual value, ignoring the placeholder."""
+
+        if self.num_rounds_entry.cget("fg") == "grey" and self.num_rounds_entry.get() == self.pholder:
+            return " "
+        return self.num_rounds_entry.get()
+
+
+    def open_info(self):
+        Info(self)
+
+
+    def check_rounds(self):
+        # Retrieve temperature to be converted
+        rounds_wanted = self.num_rounds_entry.get()
+
+        # Reset label and entry box (for when users come back to homr screen)
+        self.choose_label.config(fg="#889988", font=("Arial", "12", "bold"))
+        self.num_rounds_entry.config(bg="#FFFFFF")
+
+        error = "Oops - Please choose a whole number more than zero."
+        has_errors = "no"
+
+        # Checks if the amount to be converted is a number above absolute zero.
+        try:
+            rounds_wanted = int(rounds_wanted)
+            if rounds_wanted > 0:
+                # Clear entry box and reset instruction label so that when
+                # users play a new game, they don't see an error message.
+                self.num_rounds_entry.delete(0, END)
+                self.choose_label.config(text="How many rounds do you want to play?")
+
+                # Invoke Play class (and take across number of rounds)
+                Start(rounds_wanted)
+
+                # Hide root window (ie: hide rounds rounds choice window)
+                root.withdraw()
+            else:
+                has_errors = "yes"
+        except ValueError:
+            has_errors = "yes"
+
+        # Display the error if necessary
+        if has_errors == "yes":
+            self.choose_label.config(text=error, fg="#990000",
+                                     font=("Arial", "10", "bold"))
+            self.num_rounds_entry.config(bg="#F4CCCC")
+            self.num_rounds_entry.delete(0, END)
+
+
+class Info:
+    '''
+    Interface for explaining what anagrams are
+    '''
+
+    def __init__(self, partner):
+        background = "beige"
+        self.info_box = Toplevel()
+
+        # If users press x at top, close help and
+        # 'release' the help button
+        self.info_box.protocol("WM_DELETE_WINDOW",
+                               partial(self.close_info, partner))
+
+        # Disable help button
+        partner.anag_info_button.config(state=DISABLED)
+
+        self.info_frame = Frame(self.info_box, width=300,
+                                height=200, bg=background)
+        self.info_frame.grid()
+
+        self.info_heading_label = Label(self.info_frame,
+                                        text="What are anagrams?",
+                                        font=("Arial", "14", "bold"))
+        self.info_heading_label.grid(row=0)
+
+        info_text = "An anagram refers to a word pr phrase that is formed by " \
+                    "rearranging the characters of another one. The use of " \
+                    "anagrams in SciScramble is to hide the word that is given " \
+                    "each round. Once solved, a scientific term is revealed!\n\n" \
+                    " You get a definition of the hidden word at the beginning " \
+                    "(easy) or at the end (normal) of each round!"
+
+        self.info_text_label = Label(self.info_frame,
+                                     text=info_text, wraplength=350,
+                                     justify="left")
+        self.info_text_label.grid(row=1, padx=10)
+
+        self.dismiss_button = Button(self.info_frame,
+                                     font=("Arial", "12", "bold"),
+                                     text="Dismiss", bg="#CC6600",
+                                     fg="#FFFFFF", command=partial(self.close_info, partner))
+        self.dismiss_button.grid(row=2, padx=10, pady=10)
+
+        recolour_list = [self.info_frame, self.info_heading_label,
+                         self.info_text_label]
+
+        for item in recolour_list:
+            item.config(bg=background)
+
+    def close_info(self, partner):
+        '''
+        Closes help dialogue box and enables help button
+        '''
+
+        partner.anag_info_button.config(state=NORMAL)
+        self.info_box.destroy()
+
+
+class Start:
+    '''
+    Interface for playing the SciScramble quiz
+    '''
+
+    def __init__(self, rounds):
+        pass
+
+
+# Main routine
+if __name__ == "__main__":
+    root = Tk()
+    root.title("SciScramble")
+    StartQuiz()
+    root.mainloop()
