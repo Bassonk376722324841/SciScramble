@@ -107,6 +107,9 @@ class Play:
         self.rounds_played = IntVar()
         self.rounds_played.set(0)
 
+        # Index to show number of rounds
+        self.round_idx = 1
+
         self.rounds_wanted = IntVar()
         self.rounds_wanted.set(rounds)
 
@@ -116,22 +119,23 @@ class Play:
 
         # Interface creation...
 
-        self.quiz_box = Toplevel()
-
         # Create frame for the quiz
-        self.quiz_frame = Frame(self.quiz_box)
-        self.quiz_frame.grid(padx=10, pady=10)
+        self.quiz_frame = Frame(padx=10, pady=10)
+        self.quiz_frame.grid()
 
         # Universal font
         body_font = ("Arial","12")
 
-        # Colours
-        # ........
+        n = random.randint(0, len(terms) - 11)
+
+        # String that holds anagram
+        anagram = terms[n]
 
         # List for label details (text | font | color | row)
-        quiz_label_list = [["Round # of #", ("Arial", "16", "bold"), None, 0],
-                           ["Your term is...", body_font, "#D5E8D4", 2],
-                           ["|>TESTING<|", body_font, "#D5E8D4", 4]]
+        quiz_label_list = [[f"Round {self.round_idx} of {rounds}", ("Arial", "16", "bold"), None, 0],
+                           ["Your term is...", body_font, None, 2],
+                           [anagram, body_font, "white", 4],
+                           [f"Definition: {vocab_dict[anagram]}", ("Arial", "10", "bold"), None, 5]]
 
         # create labels in a loop
         play_labels_ref = []
@@ -142,34 +146,36 @@ class Play:
 
             play_labels_ref.append(self.new_label)
 
+
+
         # Loop for each round
-        for i in range(0,rounds):
-
-            n = random.randint(0,len(terms)-11)
-
-            # String that holds anagram
-            anagram = terms[n]
-
-            # |>- testing quiz -<|
-            answer = input(f"\n\nYour term is... {anagram}\ndefinition: {vocab_dict[anagram]}"
-                           f"\n\nPlease enter the term you think is being hidden\n~~~ ")
-
-            if answer == true_terms[n].lower():
-                cont = input("\n\nYour answer is correct! Wanna continue?\n~~~ ").lower()
-
-                if cont[0] == "n":
-                    break
-                else:
-                    pass
-            else:
-                cont = input(f"\n\nOops! --- The correct term was {true_terms[n]}, wanna try again?\n~~~ ")
-
-                cont = input("\n\nYour answer is correct! Wanna continue?\n~~~ ")
-
-                if cont[0] == "n":
-                    break
-                else:
-                    pass
+        # for i in range(0,rounds):
+        #
+        #     n = random.randint(0,len(terms)-11)
+        #
+        #     # String that holds anagram
+        #     anagram = terms[n]
+        #
+        #     # |>- testing quiz -<|
+        #     answer = input(f"\n\nYour term is... {anagram}\ndefinition: {vocab_dict[anagram]}"
+        #                    f"\n\nPlease enter the term you think is being hidden\n~~~ ")
+        #
+        #     if answer == true_terms[n].lower():
+        #         cont = input("\n\nYour answer is correct! Wanna continue?\n~~~ ").lower()
+        #
+        #         if cont[0] == "n":
+        #             break
+        #         else:
+        #             pass
+        #     else:
+        #         cont = input(f"\n\nOops! --- The correct term was {true_terms[n]}, wanna try again?\n~~~ ")
+        #
+        #         cont = input("\n\nYour answer is correct! Wanna continue?\n~~~ ")
+        #
+        #         if cont[0] == "n":
+        #             break
+        #         else:
+        #             pass
 
 
         # Quiz text labels...
