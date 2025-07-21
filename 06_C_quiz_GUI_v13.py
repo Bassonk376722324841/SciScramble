@@ -67,10 +67,6 @@ def anag_generate(mode):
     excel_file = "science_vocab.XLSX"
     data_frame = pd.read_excel(excel_file)
 
-    # Convert to csv
-    csv_file = "science_vocab.csv"
-    data_frame.to_csv(csv_file, index=False)
-
     # Extracting the terms and definitions
     terms = data_frame["Word"].tolist()
 
@@ -109,10 +105,6 @@ class Play:
         # Binary variable that helps determine
         # whether a round has ended or not
         self.played = False
-
-        # Determines whether to show a spacing
-        # error at the beginning of the round
-        self.beginning = True
 
         self.rounds_wanted = IntVar()
         self.rounds_wanted.set(rounds)
@@ -190,11 +182,6 @@ class Play:
         rounds_wanted = self.rounds_wanted.get()
         answer = self.term_entry.get().strip().lower()
 
-        # End the game if all rounds are completed
-        if self.rounds_played >= rounds_wanted:
-            Stats(self.successful_guesses, self.correct_answers, self.skipped)
-            return
-
         # If the user has completed a round, move to the next one
         if self.played:
 
@@ -209,7 +196,8 @@ class Play:
             if self.rounds_played >= rounds_wanted:
 
                 # Disable the "Next" button once in stats view
-                self.continue_button.config(state=DISABLED)
+                self.continue_button.config(text="+", state=DISABLED)
+                self.skip_button.config(text="-", state=DISABLED)
 
                 Stats(self.successful_guesses, self.correct_answers, self.skipped)
                 return
@@ -223,7 +211,7 @@ class Play:
             self.quiz_labels_ref[2].config(text=anagram)
             self.quiz_labels_ref[3].config(text=f"Definition: {self.vocab_dict[anagram]}")
 
-            self.skip_button.config(state=ACTIVE)
+            self.skip_button.config(text="- S kip", state=ACTIVE)
             self.played = False
             return
 
@@ -246,7 +234,7 @@ class Play:
         else:
             self.term_entry.delete(0, END)
             self.quiz_labels_ref[1].config(text=f"Oops! The answer was {self.true_terms[self.n]}")
-            self.skip_button.config(state=DISABLED)
+            self.skip_button.config(text="-", state=DISABLED)
             self.played = True
 
 
@@ -265,17 +253,16 @@ class Stats:
         labels = [
             ["You've went through all scrambles!", ("Arial",16,"bold"), 10],
             [f"Correct answers: {correct}",("Arial",13,"bold"), None],
-            [f"Skipped: {skipped}", ("Arial",13,"bold"), None]
+            [f"Skipped: {skipped}", ("Arial",13,"bold"), None],
+            [f"Guessed Terms:\n{','.join(guesses) if guesses else 'None'}", ("Arial",16,"bold"), None]
         ]
 
         for item in labels:
-            new_label = Label(text=item[0],font=item[1]).pack(pady=item[2])
-            new_label.config()
+            new_label = Label(self.stats_window, text=item[0],font=item[1])
+            new_label.grid()
 
-        Label(self.stats_window, text=f"Guessed Terms:\n{', '.join(guesses) if guesses else 'None'}",
-        wraplength=300).pack(pady=10)
-
-        Button(self.stats_window, text="Close", command=self.stats_window.destroy).pack(pady=5)
+        close_button = Button(self.stats_window, text="Close", command=self.stats_window.destroy)
+        close_button.grid()
 
 
 # Main routine

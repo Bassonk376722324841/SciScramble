@@ -2,6 +2,8 @@ import pandas as pd
 import openpyxl
 
 
+# Collects terms and definitions
+# and pairs them in a dictionary
 def columns_to_dict(terms, definitions):
     '''
     Extracts the content from both columns in
